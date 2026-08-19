@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ ENUMS (simulated via String) ============
+
+// Roles: SUPER_ADMIN, MANAGER, DRIVER, PASSENGER
+// Vehicle Status: AVAILABLE, EN_ROUTE, IN_RIDE, OFFLINE, MAINTENANCE
+// Ride Status: REQUESTED, DISPATCHED, ARRIVED_AT_PICKUP, IN_PROGRESS, COMPLETED, CANCELED
+
+// ============ USER (Admin & Drivers & Passengers) ============
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String
+  role          String   @default("PASSENGER") // SUPER_ADMIN, MANAGER, DRIVER, PASSENGER
+  branchId      String?  // Filial (hierarquia corporativa)
+  branchName    String?  // Nome da filial para exibição
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  driver        Driver?
+  passenger     Passenger?
+  auditLogs     AuditLog[]
+  refreshTokens RefreshToken[]
+
+  @@index([role])
+  @@index([branchId])
+}
+
+// ============ VEHICLE ============
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  plate       String   @unique
+  model       String
+  capacity    Int      @default(4)
+  trackerId   String?  // ID do rastreador na API externa
+  status      String   @default("AVAILABLE") // AVAILABLE, EN_ROUTE, IN_RIDE, OFFLINE, MAINTENANCE
+  color       String?
+  year        Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  checkouts   VehicleCheckout[]
+  rides       Ride[]
+  metadata    VehicleMetadata[]
+  currentDriver Driver?  @relation("DriverVehicle")
+
+  @@index([status])
+  @@index([trackerId])
+}
+
+model VehicleMetadata {
+  id        String  @id @default(cuid())
+  vehicleId String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+}
+
+// ============ DRIVER ============
+
+model Driver {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  licenseNumber String?
+  licenseExpiry DateTime?
+  phone         String?
+  status        String   @default("AVAILABLE") // AVAILABLE, OFF_DUTY, IN_RIDE
+  currentVehicleId String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentVehicle Vehicle? @relation("DriverVehicle", fields: [currentVehicleId], references: [id])
+  rides         Ride[]
+  checkouts     VehicleCheckout[]
+
+  @@index([status])
+  @@index([currentVehicleId])
+}
+
+// ============ PASSENGER ============
+
+model Passenger {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  phone         String?
+  costCenterId  String?  // Centro de custo associado
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  costCenter    CostCenter? @relation(fields: [costCenterId], references: [id])
+  rides         Ride[]
+
+  @@index([costCenterId])
+}
+
+// ============ COST CENTER ============
+
+model CostCenter {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  passengers  Passenger[]
+  rides       Ride[]
+  metadata    CostCenterMetadata[]
+}
+
+model CostCenterMetadata {
+  id           String  @id @default(cuid())
+  costCenterId String
+  key          String
+  value        String
+  createdAt    DateTime @default(now())
+
+  costCenter   CostCenter @relation(fields: [costCenterId], references: [id], onDelete: Cascade)
+
+  @@index([costCenterId])
+}
+
+// ============ AVAILABILITY RULE ============
+
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  // Geofencing: center lat, lng e raio em km
+  centerLat   Float?
+  centerLng   Float?
+  radiusKm    Float?   @default(50)
+  // Horários: dias úteis (0=Dom, 1=Seg, ..., 6=Sab)
+  allowedDays String   @default("1,2,3,4,5") // comma-separated
+  startTime   String?  @default("08:00") // HH:mm
+  endTime     String?  @default("18:00") // HH:mm
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============ RIDE ============
+
+model Ride {
+  id              String   @id @default(cuid())
+  passengerId     String
+  driverId        String?
+  vehicleId       String?
+  costCenterId    String?
+  status          String   @default("REQUESTED") // REQUESTED, DISPATCHED, ARRIVED_AT_PICKUP, IN_PROGRESS, COMPLETED, CANCELED
+  
+  // Origem
+  pickupAddress   String
+  pickupLat       Float
+  pickupLng       Float
+  // Destino
+  dropoffAddress  String
+  dropoffLat      Float
+  dropoffLng      Float
+  
+  // Timing
+  requestedAt     DateTime @default(now())
+  dispatchedAt    DateTime?
+  arrivedAt       DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  canceledAt      DateTime?
+  cancelReason    String?
+  
+  // Notas
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  passenger       Passenger  @relation(fields: [passengerId], references: [id])
+  driver          Driver?    @relation(fields: [driverId], references: [id])
+  vehicle         Vehicle?   @relation(fields: [vehicleId], references: [id])
+  costCenter      CostCenter? @relation(fields: [costCenterId], references: [id])
+
+  @@index([passengerId])
+  @@index([driverId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+// ============ VEHICLE CHECKOUT (Check-in/Check-out) ============
+
+model VehicleCheckout {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  driverId    String
+  checkedOutAt DateTime @default(now())
+  checkedInAt  DateTime?
+  mileageOut  Int?
+  mileageIn   Int?
+  fuelLevelOut String?  @default("full")
+  fuelLevelIn  String?
+  notes       String?
+  status      String   @default("ACTIVE") // ACTIVE, RETURNED
+
+  // Relations
+  vehicle     Vehicle @relation(fields: [vehicleId], references: [id])
+  driver      Driver  @relation(fields: [driverId], references: [id])
+
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([status])
+}
+
+// ============ AUDIT LOG ============
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // POST, PUT, PATCH, DELETE
+  resource  String   // users, vehicles, rides, etc.
+  resourceId String?
+  details   String?  // JSON string com dados alterados
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([resource])
+  @@index([createdAt])
+}
+
+// ============ REFRESH TOKEN ============
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}

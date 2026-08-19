@@ -1,0 +1,14 @@
+{
+  "name": "tracking-service",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun --hot index.ts"
+  },
+  "dependencies": {
+    "socket.io": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "@types/node": "latest"
+  }
+}

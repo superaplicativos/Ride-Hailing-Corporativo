@@ -1,0 +1,60 @@
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+*.log
+dev.log
+server.log
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Z.ai internal (nao subir)
+.z-ai-config
+.zscripts/
+Caddyfile
+tests/
+tool-results/
+upload/
+prompt
+test
+worklog.md
+
+# Database binary (gerar via prisma db push)
+db/*.db
+db/*.db-journal
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+
+# Internal tooling
+skills/

@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npx prisma generate && npx prisma db push --accept-data-loss && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next/standalone",
+  "git": {
+    "deploymentEnabled": true
+  }
+}
