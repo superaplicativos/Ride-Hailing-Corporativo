@@ -4,6 +4,7 @@ import { hashPassword } from '@/lib/auth'
 import { getRequestUser, requireRole, AuthError } from '@/lib/auth-middleware'
 import { auditLog } from '@/lib/audit'
 import { ROLES } from '@/types'
+import { trackUserCreate, licenseGuard } from '@/lib/license'
 
 export async function GET(request: NextRequest) {
   try {
@@ -148,6 +149,10 @@ export async function POST(request: NextRequest) {
       details: { name, email, role, branchId, branchName },
       request,
     })
+
+    // License tracking: log user creation
+    licenseGuard(request, { id: user.sub, role: user.role, email: user.email }, 'user_create').catch(() => {})
+    trackUserCreate(user.sub, newUser.id, newUser.role)
 
     return NextResponse.json({ success: true, data: newUser }, { status: 201 })
   } catch (error) {

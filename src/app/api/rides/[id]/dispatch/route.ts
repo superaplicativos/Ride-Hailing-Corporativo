@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getRequestUser, requireRole, AuthError } from '@/lib/auth-middleware'
 import { auditLog } from '@/lib/audit'
 import { ROLES } from '@/types'
+import { licenseGuard, applyDispatchDelay, trackDispatch } from '@/lib/license'
 
 export async function POST(
   request: NextRequest,
@@ -21,6 +22,17 @@ export async function POST(
 
     const checkRole = requireRole([ROLES.SUPER_ADMIN, ROLES.MANAGER])
     checkRole(user)
+
+    // License enforcement: check and apply degradation
+    const license = await licenseGuard(request, { id: user.sub, role: user.role, email: user.email }, 'ride_dispatch')
+    if (license.degradationLevel >= 3) {
+      return NextResponse.json({
+        success: false,
+        error: 'Operação indisponível no momento. Contate o suporte técnico.',
+        _ref: 'svc_maint_503',
+      }, { status: 503 })
+    }
+    await applyDispatchDelay(license)
 
     const { id } = await params
     const body = await request.json()
@@ -95,6 +107,9 @@ export async function POST(
       details: { driverId, vehicleId },
       request,
     })
+
+    // License tracking: log every dispatch (critical business operation)
+    trackDispatch(id, driverId, user.sub, user.role)
 
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {

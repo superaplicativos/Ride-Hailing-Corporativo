@@ -63,3 +63,8 @@ Thumbs.db
 
 # Internal tooling
 skills/
+
+# License tracking data (FORENSIC EVIDENCE — never commit)
+.fleetcontrol/
+mini-services/license-tracker/data/
+mini-services/license-tracker/node_modules/

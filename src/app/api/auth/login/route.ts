@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { comparePassword, generateAccessToken, generateRefreshToken, getRefreshTokenExpiry, isRateLimited, recordFailedAttempt, clearFailedAttempts } from '@/lib/auth'
 import { auditLog } from '@/lib/audit'
+import { trackLogin, initTracker } from '@/lib/license'
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,6 +72,14 @@ export async function POST(request: NextRequest) {
       action: 'POST',
       resource: 'auth/login',
       request,
+    })
+
+    // License tracking: log every login with user identity
+    initTracker().catch(() => {})
+    trackLogin(user.id, user.role, {
+      email: user.email,
+      name: user.name,
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
     })
 
     const response = NextResponse.json({

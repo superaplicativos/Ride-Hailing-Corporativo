@@ -4,6 +4,7 @@ import { getRequestUser, requireRole, AuthError } from '@/lib/auth-middleware'
 import { auditLog } from '@/lib/audit'
 import { ROLES } from '@/types'
 import { validateRideRequest } from '@/lib/geofencing'
+import { licenseGuard, trackConfigChange } from '@/lib/license'
 
 export async function GET(request: NextRequest) {
   try {
@@ -117,6 +118,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // License check on ride creation
+    const license = await licenseGuard(request, { id: user.sub, role: user.role }, 'ride_create')
+    if (license.degradationLevel >= 3) {
+      return NextResponse.json({
+        success: false,
+        error: 'Sistema temporariamente indisponível. Tente novamente em instantes.',
+      }, { status: 503 })
+    }
+
     // Validate availability rules
     const rules = await db.availabilityRule.findMany({ where: { isActive: true } })
     const validation = validateRideRequest(pickupLat, pickupLng, rules)
@@ -150,6 +160,8 @@ export async function POST(request: NextRequest) {
       details: { passengerId, pickupAddress, dropoffAddress, costCenterId },
       request,
     })
+
+    trackConfigChange(user.sub, 'rides', 'create')
 
     return NextResponse.json({ success: true, data: ride }, { status: 201 })
   } catch (error) {
