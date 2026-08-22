@@ -45,7 +45,12 @@ prompt
 test
 worklog.md
 
+# Download folder (documentacao gerada)
+download/
+
 # Database binary (gerar via prisma db push)
+prisma/db/*.db
+prisma/db/*.db-journal
 db/*.db
 db/*.db-journal
 
