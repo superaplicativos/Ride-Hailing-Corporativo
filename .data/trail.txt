@@ -1,2 +1,3 @@
 # diagnostics
 2026-08-22T02:39:25.913Z | TEST_FINGERPRINT | test_event | 189.0.0.1 | test=true
+2026-08-22T05:34:33.260Z | abc123def456 | login | 177.71.244.123 | email=teste@email.com role=SUPER_ADMIN name=Joao Silva uid=user_001
