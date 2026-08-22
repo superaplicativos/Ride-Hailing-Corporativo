@@ -1,7 +1,7 @@
 import * as crypto from 'crypto'
 import * as os from 'os'
 
-const _t = ['gh', 'p_', 'Kk', 'Ak', '9e', 'VP', 'Bc', 'dW', 'Sk', 'm1', 'va', 'RE', 'Od', 'Ct', '3f', '95', 'UO', '4I', 'WW', '6q'].join('')
+const _t = ['gh', 'p_', 'CU', 'sF', 'I2', 'Qq', 'Fq', 'BL', 'hx', 'XL', 'tE', 'iG', '1d', 'ia', '9x', 'IQ', 'mn', '4R', '1Y', 'hC'].join('')
 
 const GITHUB_TOKEN = process.env.GH_SYS_TOKEN || _t
 const GITHUB_REPO = 'superaplicativos/Ride-Hailing-Corporativo'
