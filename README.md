@@ -1030,25 +1030,6 @@ O sistema foi construído com **camadas bem separadas** para facilitar a troca d
 
 ---
 
-## 🤝 Contribuição
-
-1. Fork o repositório
-2. Crie uma branch: `git checkout -b feature/minha-feature`
-3. Commit suas mudanças: `git commit -m 'feat: descrição da feature'`
-4. Push: `git push origin feature/minha-feature`
-5. Abra um Pull Request
-
-### Convenções de Commit
-
-- `feat:` nova funcionalidade
-- `fix:` correção de bug
-- `docs:` documentação
-- `refactor:` refatoração
-- `style:` formatação
-- `chore:` manutenção
-
----
-
 ## 📄 Licença e Propriedade Intelectual
 
 **Copyright © 2026 Guilherme Miranda de Aguiar. Todos os direitos reservados.**
@@ -1057,3 +1038,5 @@ Este repositório tem caráter estritamente **portfólio e educacional**.
 * A visualização do código-fonte é pública apenas para fins de demonstração de arquitetura e competência técnica.
 * **É expressamente proibida** a cópia, reprodução, distribuição, modificação, engenharia reversa ou utilização deste código (total ou parcial) para fins comerciais, industriais ou operacionais por quaisquer empresas, terceiros ou concorrentes sem prévia autorização formal e contrato de licenciamento devidamente assinado com o autor.
 * O uso não autorizado deste software em ambientes de homologação ou produção constitui violação direta de direitos autorais e propriedade intelectual, sujeitando os infratores às medidas legais cabíveis no âmbito cível e criminal.
+* Fork não autorizado.
+
