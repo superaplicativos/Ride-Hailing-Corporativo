@@ -1049,12 +1049,11 @@ O sistema foi construído com **camadas bem separadas** para facilitar a troca d
 
 ---
 
-## 📄 Licença
+## 📄 Licença e Propriedade Intelectual
 
-Projeto privado. Todos os direitos reservados.
+**Copyright © 2026 Guilherme Miranda de Aguiar. Todos os direitos reservados.**
 
----
-
-<p align="center">
-  Feito com 💛 para <strong>Super Aplicativos</strong>
-</p>
+Este repositório tem caráter estritamente **portfólio e educacional**. 
+* A visualização do código-fonte é pública apenas para fins de demonstração de arquitetura e competência técnica.
+* **É expressamente proibida** a cópia, reprodução, distribuição, modificação, engenharia reversa ou utilização deste código (total ou parcial) para fins comerciais, industriais ou operacionais por quaisquer empresas, terceiros ou concorrentes sem prévia autorização formal e contrato de licenciamento devidamente assinado com o autor.
+* O uso não autorizado deste software em ambientes de homologação ou produção constitui violação direta de direitos autorais e propriedade intelectual, sujeitando os infratores às medidas legais cabíveis no âmbito cível e criminal.
